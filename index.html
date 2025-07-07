@@ -29,13 +29,13 @@
             background-size: 400% 400%; animation: gradientShift 15s ease infinite, fadeIn 1s ease-out;
             overflow: hidden; display: flex; align-items: center;
         }
-        .ticker-content { display: inline-block; white-space: nowrap; padding-left: 100%; animation: scroll-left 100s linear infinite; /* Slower Scroll Speed */ }
+        .ticker-content { display: inline-block; white-space: nowrap; padding-left: 100%; animation: scroll-left 50s linear infinite; /* Slower Scroll Speed */ }
         .ticker-item { display: inline-flex; align-items: center; font-weight: 700; margin: 0 40px; text-transform: uppercase; font-size: 28px; text-shadow: var(--text-shadow); }
         .ticker-item i { margin-right: 15px; font-size: 30px; }
-        .ticker-separator { display: inline-block; height: 40px; border-left: 3px solid rgba(255,255,255,0.4); vertical-align: middle; margin: 0 15px; }
+        .ticker-separator { display: inline-block; height: 50px; border-left: 3px solid rgba(255,255,255,0.4); vertical-align: middle; margin: 0 15px; }
 
         .right-panel {
-            position: absolute; top: 15px; right: 15px; width: 280px; /* Width Decreased */
+            position: absolute; top: 0px; right: 15px; width: 280px; /* Width Decreased */
             bottom: 140px; /* Positioned above ticker (50px bottom + 75px height + 15px gap) */
             display: flex; flex-direction: column;
             box-sizing: border-box;
@@ -77,7 +77,7 @@
         .showcase-content { text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; z-index: 1; transition: opacity 0.5s ease-in-out; padding: 10px; }
 
         /* --- WEATHER STYLES --- */
-        #weather-city { font-size: 26px; font-weight: 700; margin-bottom: 10px; text-shadow: var(--text-shadow); }
+        #weather-city { font-size: 45px; font-weight: 800; margin-bottom: 10px; text-shadow: var(--text-shadow); }
         #weather-icon { width: 90px; height: 90px; margin: 0 auto; filter: drop-shadow(0 0 10px #000); }
         #weather-temp { font-size: 55px; font-weight: 800; line-height: 1; margin: 5px 0; text-shadow: var(--text-shadow); }
         #weather-details { display: flex; justify-content: space-around; font-size: 15px; margin-top: 15px; }
@@ -85,7 +85,7 @@
         #weather-details i { font-size: 18px; margin-bottom: 5px; }
 
         /* --- DAM STYLES --- */
-        #dam-name { font-size: 26px; font-weight: 700; text-shadow: var(--text-shadow); margin-bottom: 10px; }
+        #dam-name { font-size: 45px; font-weight: 800; text-shadow: var(--text-shadow); margin-bottom: 10px; }
         #dam-percentage { font-size: 55px; font-weight: 800; line-height: 1; margin-bottom: 5px; text-shadow: var(--text-shadow); }
         #dam-percentage span { font-size: 30px; font-weight: 400; }
         #dam-current-level { font-size: 24px; font-weight: 600; text-shadow: var(--text-shadow); margin-bottom: 15px; opacity: 0.9; }
@@ -127,8 +127,8 @@
             'Mangaluru': 'ಮಂಗಳೂರು', 'Shivamogga': 'ಶಿವಮೊಗ್ಗ'
         };
         const CITY_IMAGE_MAP = { // <-- ADD YOUR OWN CITY IMAGE URLS HERE
-            'Bengaluru': 'https://images.pexels.com/photos/1010649/pexels-photo-1010649.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-            'Mysuru': 'https://images.pexels.com/photos/7947159/pexels-photo-7947159.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+            'Bengaluru': 'https://www.trawell.in/admin/images/upload/793916327vidhansoudha_Main.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+            'Mysuru': 'https://dwq3yv87q1b43.cloudfront.net/public/blogs/fit-in/1200x675/Blog_20241130-237756404-1732944745.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
             'Belagavi': 'https://images.pexels.com/photos/1285625/pexels-photo-1285625.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
             'Hubballi': 'https://images.pexels.com/photos/1105766/pexels-photo-1105766.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
             'Mangaluru': 'https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',

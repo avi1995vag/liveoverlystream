@@ -17,8 +17,10 @@
         #status { margin-top: 15px; padding: 10px; border-radius: 4px; font-weight: bold; text-align: center; }
         .status-success { background-color: #d4edda; color: #155724; }
         .status-error { background-color: #f8d7da; color: #721c24; }
-        .dam-entry { display: flex; gap: 10px; align-items: center; border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
-        .dam-entry input { width: 100%; }
+        .dam-entry { border: 1px solid #eee; padding: 15px; border-radius: 4px; margin-bottom: 15px; background: #fff; }
+        .dam-entry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .dam-entry .full-width { grid-column: 1 / -1; }
+        .dam-entry input { width: 98%; }
     </style>
 </head>
 <body>
@@ -81,10 +83,7 @@
 
         async function loadDataFromGist() {
             const gistId = document.getElementById('gistId').value.trim();
-            if (!gistId) {
-                setStatus('Please enter a Gist ID.', true);
-                return;
-            }
+            if (!gistId) { setStatus('Please enter a Gist ID.', true); return; }
             setStatus('Loading...');
             try {
                 const response = await fetch(`https://api.github.com/gists/${gistId}`);
@@ -100,22 +99,17 @@
                 
                 const damsContainer = document.getElementById('dams-container');
                 damsContainer.innerHTML = '';
-                content.dams.forEach(dam => addDamRow(dam.name, dam.current, dam.max));
+                content.dams.forEach(dam => addDamRow(dam.name, dam.current, dam.max, dam.imageUrl));
 
                 dataForm.style.display = 'block';
                 setStatus('Data loaded successfully. You can now edit the values.', false);
-            } catch (error) {
-                setStatus(`Error loading data: ${error.message}`, true);
-            }
+            } catch (error) { setStatus(`Error loading data: ${error.message}`, true); }
         }
 
         async function saveDataToGist() {
             const gistId = document.getElementById('gistId').value.trim();
             const pat = document.getElementById('githubPat').value.trim();
-            if (!gistId || !pat) {
-                setStatus('Gist ID and Personal Access Token are required to save.', true);
-                return;
-            }
+            if (!gistId || !pat) { setStatus('Gist ID and Personal Access Token are required to save.', true); return; }
             setStatus('Saving...');
 
             try {
@@ -133,43 +127,35 @@
                         name: entry.querySelector('.dam-name').value,
                         current: parseFloat(entry.querySelector('.dam-current').value),
                         max: parseFloat(entry.querySelector('.dam-max').value),
+                        imageUrl: entry.querySelector('.dam-image').value
                     });
                 });
                 
-                const payload = {
-                    files: {
-                        'data.json': {
-                            content: JSON.stringify(data, null, 2) // Pretty print JSON
-                        }
-                    }
-                };
+                const payload = { files: { 'data.json': { content: JSON.stringify(data, null, 2) }}};
                 
                 const response = await fetch(`https://api.github.com/gists/${gistId}`, {
                     method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${pat}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
+                    headers: { 'Authorization': `Bearer ${pat}`, 'Accept': 'application/vnd.github.v3+json' },
                     body: JSON.stringify(payload)
                 });
                 
                 if (!response.ok) throw new Error(`Failed to save. Status: ${response.status} ${await response.text()}`);
-                
                 setStatus('Data saved successfully to Gist!', false);
-            } catch (error) {
-                setStatus(`Error saving data: ${error.message}`, true);
-            }
+            } catch (error) { setStatus(`Error saving data: ${error.message}`, true); }
         }
         
-        function addDamRow(name = '', current = '', max = '') {
+        function addDamRow(name = '', current = '', max = '', imageUrl = '') {
             const container = document.getElementById('dams-container');
             const newRow = document.createElement('div');
             newRow.className = 'dam-entry';
             newRow.innerHTML = `
-                <input type="text" class="dam-name" placeholder="Dam Name" value="${name}">
-                <input type="number" step="any" class="dam-current" placeholder="Current Level" value="${current}">
-                <input type="number" step="any" class="dam-max" placeholder="Max Level" value="${max}">
-                <button class="danger" onclick="this.parentElement.remove()">Remove</button>
+                <div class="dam-entry-grid">
+                    <input type="text" class="dam-name" placeholder="Dam Name" value="${name}">
+                    <button class="danger" onclick="this.closest('.dam-entry').remove()" style="grid-row: 1;">Remove</button>
+                    <input type="number" step="any" class="dam-current" placeholder="Current Level (ft)" value="${current}">
+                    <input type="number" step="any" class="dam-max" placeholder="Max Level (ft)" value="${max}">
+                    <input type="text" class="dam-image full-width" placeholder="Image URL (e.g., https://.../image.jpg)" value="${imageUrl}">
+                </div>
             `;
             container.appendChild(newRow);
         }

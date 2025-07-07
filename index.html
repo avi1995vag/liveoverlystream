@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic News Overlay</title>
+    <title>Advanced News Overlay</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,30 +12,31 @@
     
     <style>
         :root {
-            --panel-bg: rgba(20, 20, 25, 0.4); --text-light: #ffffff;
-            --text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            --panel-bg: rgba(20, 20, 25, 0.4);
+            --text-light: #ffffff;
+            --text-shadow: 0 1px 3px rgba(0,0,0,0.6);
         }
-        body { margin: 0; font-family: 'Anek Kannada', sans-serif; background-color: #111; color: var(--text-light); overflow: hidden; }
+        body { margin: 0; font-family: 'Anek Kannada', sans-serif; background-color: transparent; color: var(--text-light); overflow: hidden; }
         
-        /* --- Overlay Styles --- */
-        #overlay-container { display: none; /* Hidden by default */ }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        @keyframes scroll-left { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
         .ticker-tape {
-            position: absolute; bottom: 50px; left: 0; width: 100%; height: 60px;
+            position: absolute; bottom: 50px; left: 0; width: 100%; height: 75px; /* Ticker Increased Height */
             background: linear-gradient(90deg, #0052d4, #4364f7, #6fb1fc, #4364f7, #0052d4);
             background-size: 400% 400%; animation: gradientShift 15s ease infinite, fadeIn 1s ease-out;
             overflow: hidden; display: flex; align-items: center;
         }
-        @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-        .ticker-content { display: inline-block; white-space: nowrap; padding-left: 100%; animation: scroll-left 45s linear infinite; }
-        .ticker-item { display: inline-flex; align-items: center; font-weight: 600; margin: 0 30px; text-transform: uppercase; font-size: 22px; text-shadow: var(--text-shadow); }
-        .ticker-item i { margin-right: 12px; font-size: 24px; }
-        .ticker-separator { display: inline-block; height: 30px; border-left: 2px solid rgba(255,255,255,0.4); vertical-align: middle; margin: 0 10px; }
+        .ticker-content { display: inline-block; white-space: nowrap; padding-left: 100%; animation: scroll-left 50s linear infinite; }
+        .ticker-item { display: inline-flex; align-items: center; font-weight: 700; margin: 0 40px; text-transform: uppercase; font-size: 28px; text-shadow: var(--text-shadow); }
+        .ticker-item i { margin-right: 15px; font-size: 30px; }
+        .ticker-separator { display: inline-block; height: 40px; border-left: 3px solid rgba(255,255,255,0.4); vertical-align: middle; margin: 0 15px; }
 
         .right-panel {
-            position: absolute; top: 0; right: 0; width: 360px; height: 100%; display: flex; flex-direction: column; gap: 15px;
+            position: absolute; top: 0; right: 0; width: 320px; /* Sidebar Width Decreased */
+            height: 100%; display: flex; flex-direction: column;
             padding: 15px; box-sizing: border-box;
             background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px), linear-gradient(to bottom, #7d2607, #d56c0b 50%, #5a1d05);
             opacity: 0; animation: fadeIn 0.7s ease-out 0.2s forwards;
@@ -44,238 +45,223 @@
         .info-card {
             background: var(--panel-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); opacity: 0; animation: slideUp 0.7s ease-out forwards;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            flex-grow: 1; position: relative;
+            opacity: 0; animation: slideUp 0.7s ease-out forwards;
         }
-        #fuel-prices { animation-delay: 0.5s; }
-        .rotating-info-container { animation-delay: 0.7s; }
-        .rotating-info-container { flex-grow: 1; position: relative; background: none; border: none; box-shadow: none; padding: 0; }
-        .rotating-panel { position: absolute; width: 100%; height: 100%; transition: opacity 0.6s ease-in-out, visibility 0.6s; }
-        .panel-active { opacity: 1; visibility: visible; }
-        .panel-hidden { opacity: 0; visibility: hidden; }
-        .card-header { display: inline-flex; align-items: center; padding: 6px 15px; border-radius: 50px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; font-size: 22px; }
-        .card-header i { margin-right: 10px; }
-        #fuel-prices .card-header { background: linear-gradient(to right, #e52d27, #b31217); }
-        #weather-report-card .card-header { background: linear-gradient(to right, #00c6ff, #0072ff); }
-        #dam-levels .card-header { background: linear-gradient(to right, #08aeea, #2af598); }
-        #fuel-prices .price-item { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; text-shadow: var(--text-shadow); font-size: 20px; }
-        #fuel-prices .price-value { font-size: 28px; font-weight: 700; }
-        .data-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); text-shadow: var(--text-shadow); font-size: 20px; }
-        .data-item:last-child { border-bottom: none; }
-        .data-item .item-name { font-weight: 600; }
-        .data-item .item-value img { height: 36px; margin-right: 8px; filter: drop-shadow(0 0 2px #000); }
         
-        /* --- Admin Panel Styles --- */
-        #admin-panel {
-            display: none; /* Hidden by default */
-            padding: 30px; max-width: 800px; margin: 40px auto;
-            background-color: #2c3e50; border-radius: 10px;
+        .rotating-panel {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            opacity: 0; visibility: hidden; transition: opacity 0.6s ease-in-out, visibility 0.6s;
+            display: flex; flex-direction: column;
         }
-        #admin-panel h1 { text-align: center; color: #ecf0f1; }
-        #admin-panel label { display: block; font-size: 18px; margin-top: 15px; color: #bdc3c7; }
-        #admin-panel input, #admin-panel textarea {
-            width: 100%; padding: 10px; font-size: 16px; margin-top: 5px;
-            border: 1px solid #7f8c8d; border-radius: 5px; background-color: #34495e; color: #ecf0f1;
-            box-sizing: border-box;
-        }
-        #admin-panel textarea { height: 120px; resize: vertical; }
-        #admin-panel button {
-            display: block; width: 100%; padding: 15px; font-size: 20px; font-weight: bold;
-            margin-top: 30px; background-color: #27ae60; color: white; border: none;
-            border-radius: 5px; cursor: pointer; transition: background-color 0.3s;
-        }
-        #admin-panel button:hover { background-color: #2ecc71; }
-        #save-status {
-            text-align: center; font-size: 18px; margin-top: 20px; color: #2ecc71;
-            height: 25px; transition: opacity 0.5s;
-        }
+        .panel-active { opacity: 1; visibility: visible; }
+
+        .card-header { display: inline-flex; align-items: center; padding: 8px 18px; border-radius: 50px; font-weight: 700; text-transform: uppercase; margin-bottom: 20px; font-size: 22px; }
+        .card-header i { margin-right: 12px; }
+        #weather-panel .card-header { background: linear-gradient(to right, #00c6ff, #0072ff); }
+        #dam-panel .card-header { background: linear-gradient(to right, #08aeea, #2af598); }
+
+        .showcase-content { text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; transition: opacity 0.5s ease-in-out; }
+
+        /* --- WEATHER STYLES --- */
+        #weather-city { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+        #weather-icon { width: 100px; height: 100px; margin: 0 auto; filter: drop-shadow(0 0 10px #000); }
+        #weather-temp { font-size: 60px; font-weight: 700; line-height: 1; margin: 10px 0; }
+        #weather-details { display: flex; justify-content: space-around; font-size: 16px; margin-top: 15px; }
+        #weather-details > div { display: flex; flex-direction: column; align-items: center; }
+        #weather-details i { font-size: 20px; margin-bottom: 5px; }
+
+        /* --- DAM STYLES --- */
+        #dam-name { font-size: 28px; font-weight: 700; margin-bottom: 20px; }
+        #dam-percentage { font-size: 60px; font-weight: 700; line-height: 1; margin-bottom: 15px; }
+        #dam-percentage span { font-size: 30px; font-weight: 400; }
+        .progress-bar-container { height: 25px; background-color: rgba(0,0,0,0.3); border-radius: 25px; overflow: hidden; margin: 0 10px 20px 10px; border: 1px solid rgba(255,255,255,0.2); }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(to right, #00c6ff, #0072ff); border-radius: 25px; transition: width 1s ease-out; }
+        #dam-levels { font-size: 18px; }
+
     </style>
 </head>
 <body>
-
-    <!-- CONTAINER FOR THE LIVE OVERLAY -->
-    <div id="overlay-container">
-        <div class="ticker-tape"><div class="ticker-content" id="ticker-content"></div></div>
+    <div class="news-overlay">
+        <div class="ticker-tape"><div class="ticker-content" id="ticker-content">Loading Ticker...</div></div>
+        
         <div class="right-panel">
-            <div class="info-card" id="fuel-prices">
-                <div class="card-header"><i class="fa-solid fa-gas-pump"></i> Fuel Prices</div>
-                <div class="price-item"><span>Petrol</span><span class="price-value" id="petrol-price">...</span></div>
-                <div class="price-item"><span>Diesel</span><span class="price-value" id="diesel-price">...</span></div>
-            </div>
-            <div class="info-card rotating-info-container">
-                <div class="rotating-panel" id="weather-report-card">
+            <div class="info-card">
+                <div class="rotating-panel" id="weather-panel">
                     <div class="card-header"><i class="fa-solid fa-cloud-sun"></i> Weather Report</div>
-                    <div id="weather-list">Loading...</div>
+                    <div class="showcase-content" id="weather-showcase">Loading Weather...</div>
                 </div>
-                <div class="rotating-panel" id="dam-levels">
-                    <div class="card-header"><i class="fa-solid fa-water"></i> Dam Water Level</div>
-                    <div id="dam-level-list">Loading...</div>
+                <div class="rotating-panel" id="dam-panel">
+                    <div class="card-header"><i class="fa-solid fa-water"></i> Dam Water Levels</div>
+                    <div class="showcase-content" id="dam-showcase">Loading Dam Levels...</div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- CONTAINER FOR THE HIDDEN ADMIN PANEL -->
-    <div id="admin-panel">
-        <h1>Data Control Panel</h1>
-        
-        <label for="gold-input">Gold Price (per 10g)</label>
-        <input type="text" id="gold-input" placeholder="e.g., 72500.00">
-        
-        <label for="silver-input">Silver Price (per kg)</label>
-        <input type="text" id="silver-input" placeholder="e.g., 91500.00">
-        
-        <label for="petrol-input">Petrol Price</label>
-        <input type="text" id="petrol-input" placeholder="e.g., 101.94">
-        
-        <label for="diesel-input">Diesel Price</label>
-        <input type="text" id="diesel-input" placeholder="e.g., 87.89">
-
-        <label for="dams-input">Dam Water Levels (one per line: Name, Level)</label>
-        <textarea id="dams-input" placeholder="KRS Dam, 124.80 ft&#10;Almatti Dam, 519.60 m"></textarea>
-
-        <button id="save-data-button">Save Data</button>
-        <div id="save-status"></div>
     </div>
 
     <script>
         // ===================================================================
         // ===               CONFIGURATION & DATA SECTION                  ===
         // ===================================================================
-        const WEATHER_API_KEY = 'YOUR_WEATHERAPI_KEY_HERE';
-        const CITIES_FOR_WEATHER = [ 'Bengaluru', 'Mysuru', 'Belagavi', 'Hubballi', 'Mangaluru', 'Shivamogga', 'Ballari', 'Bidar', 'Koppal' ];
+        const GIST_ID = '34f940d8007a0a2180f12dc5984b536f'; // <-- PASTE YOUR GIST ID HERE
+        const WEATHER_API_KEY = 'df00118525464de4b0c34915251805'; // <-- PASTE YOUR WEATHERAPI KEY HERE
+
+        const CITIES_FOR_WEATHER = ['Bengaluru', 'Mysuru', 'Belagavi', 'Hubballi', 'Mangaluru', 'Shivamogga', 'Ballari', 'Bidar'];
         const CITY_NAME_MAP = {
             'Bengaluru': 'ಬೆಂಗಳೂರು', 'Mysuru': 'ಮೈಸೂರು', 'Belagavi': 'ಬೆಳಗಾವಿ', 'Hubballi': 'ಹುಬ್ಬಳ್ಳಿ',
-            'Mangaluru': 'ಮಂಗಳೂರು', 'Shivamogga': 'ಶಿವಮೊಗ್ಗ', 'Ballari': 'ಬಳ್ಳಾರಿ', 'Bidar': 'ಬೀದರ್', 'Koppal': 'ಕೊಪ್ಪಳ'
+            'Mangaluru': 'ಮಂಗಳೂರು', 'Shivamogga': 'ಶಿವಮೊಗ್ಗ', 'Ballari': 'ಬಳ್ಳಾರಿ', 'Bidar': 'ಬೀದರ್'
         };
 
-        const ROTATION_INTERVAL_MS = 10000;
-        const UPDATE_INTERVAL_MS = 60 * 1000; // Check for data updates every minute
-
-        // localStorage keys
-        const RATES_STORAGE_KEY = 'newsOverlay_rates';
-        const DAMS_STORAGE_KEY = 'newsOverlay_dams';
+        const ROTATION_INTERVAL_MS = 6000;  // Rotate content every 6 seconds
+        const DATA_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // Refresh data from Gist every 5 minutes
         
         // ===================================================================
-        // ===                    MAIN ROUTER & LOGIC                      ===
+        // ===                    APPLICATION LOGIC                        ===
         // ===================================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('view') === 'admin') {
-                runAdminPanel();
-            } else {
-                runOverlay();
+        
+        let appData = {};
+        let weatherDataCache = [];
+        
+        let currentMode = 'weather'; // 'weather' or 'dams'
+        let weatherIndex = 0;
+        let damIndex = 0;
+
+        async function fetchGistData() {
+            if (!GIST_ID || GIST_ID === 'YOUR_GIST_ID_HERE') {
+                console.error("Gist ID is not configured.");
+                return null;
             }
-        });
-
-        // --- ADMIN PANEL LOGIC ---
-        function runAdminPanel() {
-            document.getElementById('admin-panel').style.display = 'block';
-            
-            // Load existing data into form fields
-            const savedRates = JSON.parse(localStorage.getItem(RATES_STORAGE_KEY)) || {};
-            const savedDams = JSON.parse(localStorage.getItem(DAMS_STORAGE_KEY)) || [];
-            
-            document.getElementById('gold-input').value = savedRates.gold || '';
-            document.getElementById('silver-input').value = savedRates.silver || '';
-            document.getElementById('petrol-input').value = savedRates.petrol || '';
-            document.getElementById('diesel-input').value = savedRates.diesel || '';
-            document.getElementById('dams-input').value = savedDams.map(dam => `${dam.name}, ${dam.level}`).join('\n');
-
-            // Save button event listener
-            document.getElementById('save-data-button').addEventListener('click', () => {
-                const rates = {
-                    gold: document.getElementById('gold-input').value,
-                    silver: document.getElementById('silver-input').value,
-                    petrol: document.getElementById('petrol-input').value,
-                    diesel: document.getElementById('diesel-input').value,
-                };
-                const damsText = document.getElementById('dams-input').value;
-                const dams = damsText.split('\n').filter(line => line.trim() !== '').map(line => {
-                    const [name, level] = line.split(',');
-                    return { name: name.trim(), level: level.trim() };
-                });
-
-                localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(rates));
-                localStorage.setItem(DAMS_STORAGE_KEY, JSON.stringify(dams));
-                
-                const status = document.getElementById('save-status');
-                status.textContent = 'Data Saved Successfully!';
-                setTimeout(() => { status.textContent = ''; }, 3000);
-            });
+            const url = `https://api.github.com/gists/${GIST_ID}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Gist API Error: ${response.statusText}`);
+                const gistData = await response.json();
+                return JSON.parse(gistData.files['data.json'].content);
+            } catch (error) {
+                console.error('Error fetching Gist data:', error);
+                return null;
+            }
+        }
+        
+        async function fetchWeatherData() {
+            weatherDataCache = [];
+            if (!WEATHER_API_KEY || WEATHER_API_KEY.includes('YOUR_')) {
+                console.error("Weather API Key missing.");
+                return;
+            }
+            for (const city of CITIES_FOR_WEATHER) {
+                const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${city}&aqi=no`;
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        weatherDataCache.push(await response.json());
+                    } else { throw new Error(`Weather fetch failed for ${city}`); }
+                } catch (error) { console.error(error); }
+            }
         }
 
-        // --- OVERLAY LOGIC ---
-        function runOverlay() {
-            document.getElementById('overlay-container').style.display = 'block';
-            let weatherDataCache = [];
-            let mainPanelIndex = 0;
+        function updateTicker() {
+            const { gold_22k, gold_24k, silver_kg, petrol, diesel } = appData;
+            const tickerItems = `
+                <div class="ticker-item"><i class="fa-solid fa-coins" style="color: #ffd700;"></i>22k Gold: ₹${gold_22k}/g</div><div class="ticker-separator"></div>
+                <div class="ticker-item"><i class="fa-solid fa-circle" style="color: #ffec8b;"></i>24k Gold: ₹${gold_24k}/g</div><div class="ticker-separator"></div>
+                <div class="ticker-item"><i class="fa-solid fa-database" style="color: #e0e0e0;"></i>Silver: ₹${silver_kg}/kg</div><div class="ticker-separator"></div>
+                <div class="ticker-item"><i class="fa-solid fa-gas-pump" style="color: #e52d27;"></i>Petrol: ₹${petrol}</div><div class="ticker-separator"></div>
+                <div class="ticker-item"><i class="fa-solid fa-truck-droplet" style="color: #f7b733;"></i>Diesel: ₹${diesel}</div>`;
+            document.getElementById('ticker-content').innerHTML = tickerItems.repeat(4);
+        }
 
-            function updateAllOverlayData() {
-                // Load data from localStorage
-                const rates = JSON.parse(localStorage.getItem(RATES_STORAGE_KEY)) || {};
-                const dams = JSON.parse(localStorage.getItem(DAMS_STORAGE_KEY)) || [];
+        function updateWeatherDisplay() {
+            if (weatherDataCache.length === 0) return;
+            const data = weatherDataCache[weatherIndex];
+            const showcase = document.getElementById('weather-showcase');
+            showcase.style.opacity = 0;
+            setTimeout(() => {
+                showcase.innerHTML = `
+                    <div id="weather-city">${CITY_NAME_MAP[data.location.name] || data.location.name}</div>
+                    <img id="weather-icon" src="https:${data.current.condition.icon}" alt="${data.current.condition.text}">
+                    <div id="weather-temp">${Math.round(data.current.temp_c)}°</div>
+                    <div id="weather-details">
+                        <div><i class="fa-solid fa-temperature-three-quarters"></i>${Math.round(data.current.feelslike_c)}°</div>
+                        <div><i class="fa-solid fa-droplet"></i>${data.current.humidity}%</div>
+                        <div><i class="fa-solid fa-wind"></i>${Math.round(data.current.wind_kph)} kph</div>
+                    </div>
+                `;
+                showcase.style.opacity = 1;
+            }, 500);
+        }
+        
+        function updateDamDisplay() {
+            if (!appData.dams || appData.dams.length === 0) return;
+            const dam = appData.dams[damIndex];
+            const percentage = ((dam.current / dam.max) * 100).toFixed(1);
+            const showcase = document.getElementById('dam-showcase');
+            
+            showcase.style.opacity = 0;
+            setTimeout(() => {
+                showcase.innerHTML = `
+                    <div id="dam-name">${dam.name}</div>
+                    <div id="dam-percentage">${percentage}<span>%</span></div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: ${percentage}%;"></div>
+                    </div>
+                    <div id="dam-levels">Current: ${dam.current} / Max: ${dam.max}</div>
+                `;
+                showcase.style.opacity = 1;
+            }, 500);
+        }
+        
+        function advanceRotation() {
+            if (currentMode === 'weather') {
+                updateWeatherDisplay();
+                weatherIndex++;
+                if (weatherIndex >= weatherDataCache.length) {
+                    weatherIndex = 0;
+                    currentMode = 'dams'; // Switch to dams
+                    document.getElementById('weather-panel').classList.remove('panel-active');
+                    document.getElementById('dam-panel').classList.add('panel-active');
+                }
+            } else if (currentMode === 'dams') {
+                updateDamDisplay();
+                damIndex++;
+                if (damIndex >= appData.dams.length) {
+                    damIndex = 0;
+                    currentMode = 'weather'; // Switch back to weather
+                    document.getElementById('dam-panel').classList.remove('panel-active');
+                    document.getElementById('weather-panel').classList.add('panel-active');
+                }
+            }
+        }
 
-                // Update UI
-                document.getElementById('petrol-price').textContent = `₹ ${rates.petrol || '--'}`;
-                document.getElementById('diesel-price').textContent = `₹ ${rates.diesel || '--'}`;
-                updateTicker(rates.gold, rates.silver);
+        async function initialize() {
+            document.getElementById('weather-panel').classList.add('panel-active');
+            
+            const [gistResult, weatherResult] = await Promise.all([
+                fetchGistData(),
+                fetchWeatherData()
+            ]);
 
-                const damLevelList = document.getElementById('dam-level-list');
-                damLevelList.innerHTML = '';
-                if (dams.length > 0) {
-                    dams.forEach(dam => {
-                        damLevelList.innerHTML += `<div class="data-item"><span class="item-name">${dam.name.toUpperCase()}</span><span class="item-value">${dam.level}</span></div>`;
-                    });
-                } else {
-                    damLevelList.innerHTML = 'No data available.';
+            if (gistResult) {
+                appData = gistResult;
+                updateTicker();
+                if (!appData.dams || appData.dams.length === 0) { // If no dams, stay on weather
+                    currentMode = 'weather';
                 }
             }
             
-            function updateTicker(goldPrice = '...', silverPrice = '...') {
-                const tickerItems = `
-                    <div class="ticker-item"><i class="fa-solid fa-coins" style="color: #ffd700;"></i>Gold: ₹${goldPrice}/10g</div><div class="ticker-separator"></div>
-                    <div class="ticker-item"><i class="fa-solid fa-database" style="color: #e0e0e0;"></i>Silver: ₹${silverPrice}/kg</div><div class="ticker-separator"></div>
-                    <div class="ticker-item"><i class="fa-solid fa-arrow-trend-up"></i>SENSEX: 74,227.60</div><div class="ticker-separator"></div>
-                    <div class="ticker-item"><i class="fa-solid fa-arrow-trend-down"></i>NIFTY: 22,501.10</div>`;
-                document.getElementById('ticker-content').innerHTML = tickerItems.repeat(5);
-            }
-
-            async function fetchAndUpdateWeather() {
-                const weatherList = document.getElementById('weather-list');
-                weatherList.innerHTML = ''; // Clear previous list
-                weatherDataCache = [];
-                for (const city of CITIES_FOR_WEATHER) {
-                    if (!WEATHER_API_KEY || WEATHER_API_KEY.includes('YOUR_')) { console.error("Weather API Key missing."); break; }
-                    const url = `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${city}&aqi=no`;
-                    try {
-                        const response = await fetch(url);
-                        if (!response.ok) throw new Error();
-                        const data = await response.json();
-                        weatherDataCache.push(data); // Cache the data
-                        // Populate the list view
-                        weatherList.innerHTML += `<div class="data-item"><span class="item-name">${CITY_NAME_MAP[city] || city.toUpperCase()}</span><span class="item-value"><img src="https:${data.current.condition.icon}" alt="${data.current.condition.text}"> ${Math.round(data.current.temp_c)}°C</span></div>`;
-                    } catch (error) { console.error(`Failed to fetch weather for ${city}`); }
-                }
-            }
-
-            function rotateMainPanels() {
-                const panels = document.querySelectorAll('.rotating-panel');
-                panels[mainPanelIndex].classList.replace('panel-active', 'panel-hidden');
-                mainPanelIndex = (mainPanelIndex + 1) % panels.length;
-                panels[mainPanelIndex].classList.replace('panel-hidden', 'panel-active');
-            }
-
-            // Initial setup
-            const panels = document.querySelectorAll('.rotating-panel');
-            panels.forEach((panel, index) => { panel.classList.add(index === 0 ? 'panel-active' : 'panel-hidden'); });
+            advanceRotation(); // Initial display
+            setInterval(advanceRotation, ROTATION_INTERVAL_MS);
             
-            updateAllOverlayData();
-            fetchAndUpdateWeather();
-            
-            setInterval(rotateMainPanels, ROTATION_INTERVAL_MS);
-            setInterval(updateAllOverlayData, UPDATE_INTERVAL_MS); // Periodically check for updated data
-            setInterval(fetchAndUpdateWeather, 5 * 60 * 1000); // Refresh weather less frequently
+            setInterval(async () => {
+                const latestGistData = await fetchGistData();
+                if(latestGistData) appData = latestGistData;
+                await fetchWeatherData();
+                updateTicker();
+            }, DATA_REFRESH_INTERVAL_MS);
         }
+
+        document.addEventListener('DOMContentLoaded', initialize);
     </script>
 </body>
 </html>
